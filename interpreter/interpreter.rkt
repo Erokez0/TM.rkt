@@ -1,51 +1,67 @@
 #lang racket
 
-(define Q0 0)
-(define Q1 1)
-(define Q2 2)
-(define Q3 3)
-(define Q_ACCEPT 4)
+(require "../consts/consts.rkt")
+(require "../rules/rules.rkt")
 
-(define LEFT 5)
-(define RIGHT 6)
-(define STAY 7)
 
-(define/contract (process-instruction state cymbol)
-  (-> char? char? (list/c char? integer? integer?))
-  (match* (state cymbol)
-    [(Q0 #\1) (#\x RIGHT Q1)]
-    [(Q0 #\*) (#\* RIGHT Q3)]
-    [(Q0 #\_) (#\_ STAY Q_ACCEPT)]
-    [(Q1 #\1) (#\1 RIGHT Q1)]
-    [(Q1 #\*) (#\* RIGHT Q1)]
-    [(Q1 #\x) (#\x RIGHT Q2)]
-    [(Q2 #\1) (#\1 RIGHT Q2)]
-    [(Q2 #\_) (#\1 LEFT Q1)]
-    [(Q3 #\1) (#\1 RIGHT Q3)]
-    [(Q3 #\x) (#\1 LEFT Q3)]
-    [(Q3 #\_) (#\_ LEFT Q0)]
+
+;; rules[state][instruction] -> '(state instruction direction)
+(define/contract (process-instruction rules instruction state)
+  (-> hash? (or/c symbol? char? string?) (or/c symbol? char? string?) list?)
+  (unless (hash-has-key? rules state)
+    (error (format "rules for state \"~a\" are not defined" state)))
+
+  (define instruction-hash (hash-ref rules state))
+
+  (unless (hash-has-key? instruction-hash instruction)
+    (error (format "rules for state \"~a\" with instruction \"~a\" are not defined" state instruction)))
+
+  (hash-ref instruction-hash instruction)
+  )
+
+(define/contract (move-position position direction)
+  (-> number? (or/c symbol? char? string?) number?)
+  (match direction
+    ['LEFT (- position 1)]
+    ['RIGHT (+ position 1)]
+    [_ (error "invalid direction")]
     )
   )
 
+(define/contract (interpret tape rules)
+  (-> (listof (or/c symbol? char? string?)) hash? (listof (or/c symbol? char? string?)))
+  (define starting-state 'START)
+  (define starting-position 0)
 
-;; (define/contract (start-execution tape)
-;;   (-> (listof char?) (listof char?)
-;;       (define/contract (loop state tape)
-;;         (-> integer? (listof char?) (listof char?))
-;;         (if (= state Q_ACCEPT)
-;;             tape
-;;             (loop state tape)
-;;             )
-;;         )
-;;       (loop Q0 tape)
-;;       )
-;;   )
+  (define/contract (loop tape rules state position)
+    (-> (listof (or/c symbol? char? string?)) hash? (or/c symbol? char? string?) number? (listof (or/c symbol? char? string?)))
+    (when (= position (length tape))
+      (set! position 0)
+      )
+    (define instruction (list-ref tape position))
+    (define result (process-instruction rules instruction state))
+    (define new-state (car result))
+    (define new-instruction (cadr result))
+    (define direction (caddr result))
+    (define new-position (move-position position direction))
+    (define processed-tape (list-set tape position new-instruction))
 
-(process-instruction (0 #\*))
-
-(define/contract (interpret tape)
-  (-> (listof char?) void?)
-  (void)
+    (if
+      (equal? new-state END)
+      (processed-tape)
+      (loop processed-tape rules new-state new-position)
+      )
+    )
+  (loop tape rules starting-state starting-position)
   )
+
+
+
+(define example-rules (make-rules))
+(add-rule example-rules 'Q0 #\1 (list 'Q1 'x RIGHT))
+(add-rule example-rules 'START #\1 (list 'Q1 'x RIGHT))
+
+(interpret (list #\1) example-rules)
+
 
 (provide interpret)
