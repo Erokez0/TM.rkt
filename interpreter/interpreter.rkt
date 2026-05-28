@@ -30,7 +30,7 @@
 
 (define/contract (interpret tape rules)
   (-> (listof (or/c symbol? char? string?)) hash? (listof (or/c symbol? char? string?)))
-  (define starting-state 'START)
+  (define starting-state START)
   (define starting-position 0)
 
   (define/contract (loop tape rules state position)
@@ -57,11 +57,11 @@
 
 
 
-(define example-rules (make-rules))
-(add-rule example-rules 'Q0 #\1 (list 'Q1 'x RIGHT))
-(add-rule example-rules 'START #\1 (list 'Q1 'x RIGHT))
+ (define example-rules (make-rules))
+ (add-rule example-rules "Q0" "1" (list 'Q1 "x" RIGHT))
+ (add-rule example-rules START "1" (list END "x" RIGHT))
 
-(interpret (list #\1) example-rules)
+ (interpret (list "1") example-rules)
 
 
 (provide interpret)

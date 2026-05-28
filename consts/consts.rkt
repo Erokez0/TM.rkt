@@ -1,10 +1,10 @@
 #lang racket
 
-(define END 'END)
+
+(define START "START")
+(define END "END")
 
 (define LEFT 'LEFT)
 (define RIGHT 'RIGHT)
 
-(provide LEFT RIGHT)
-
-(provide END)
+(provide START END LEFT RIGHT)
