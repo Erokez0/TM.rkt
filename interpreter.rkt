@@ -22,8 +22,8 @@
 (define/contract (move-position position direction)
   (-> number? string? number?)
   (match direction
-    [LEFT (- position 1)]
-    [RIGHT (+ position 1)]
+    ["LEFT" (- position 1)]
+    ["RIGHT" (+ position 1)]
     [_ (error "invalid direction")]
     )
   )

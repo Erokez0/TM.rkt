@@ -20,5 +20,14 @@
     )
   )
 
+(define (delete-rule rules state instruction)
+  (-> hash? string? string? void?)
+  (hash-update!
+    rules state
+    (lambda (instruction-hash)
+      (hash-remove instruction-hash instruction)
+      )
+    )
+  )
 
-(provide make-rules add-rule)
+(provide make-rules add-rule delete-rule)

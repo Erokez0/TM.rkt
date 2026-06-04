@@ -23,6 +23,7 @@
       [callback
        (lambda (b e)
          (begin
+           (delete-rule rules (send state-input get-value) (send symbol-input get-value))
            (send state-column delete-child state-input)
            (send symbol-column delete-child symbol-input)
            (send new-state-column delete-child new-state-input)
@@ -171,7 +172,11 @@
 
   (define (on-process tf evt)
     (define tape (string-split (send tape-input get-value) " "))
-    (define result-tape (interpret tape rules))
+    (define result-tape '())
+    (with-handlers ([exn:fail? (lambda (e) (message-box "Ошибка" (exn-message e)))])
+      (set! result-tape (interpret tape rules))
+      (void)
+      )
     (define result-tape-str (string-join result-tape " "))
     (send tape-input set-value result-tape-str)
     )
