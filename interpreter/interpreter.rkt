@@ -1,13 +1,13 @@
 #lang racket
 
-(require "../consts/consts.rkt")
+(require "../consts/consts.rkt") ;; contains START END LEFT RIGHT
 (require "../rules/rules.rkt")
 
 
 
 ;; rules[state][instruction] -> '(state instruction direction)
 (define/contract (process-instruction rules instruction state)
-  (-> hash? (or/c symbol? char? string?) (or/c symbol? char? string?) list?)
+  (-> hash? string? string? list?)
   (unless (hash-has-key? rules state)
     (error (format "rules for state \"~a\" are not defined" state)))
 
@@ -20,21 +20,21 @@
   )
 
 (define/contract (move-position position direction)
-  (-> number? (or/c symbol? char? string?) number?)
+  (-> number? string? number?)
   (match direction
-    ['LEFT (- position 1)]
-    ['RIGHT (+ position 1)]
+    [LEFT (- position 1)]
+    [RIGHT (+ position 1)]
     [_ (error "invalid direction")]
     )
   )
 
 (define/contract (interpret tape rules)
-  (-> (listof (or/c symbol? char? string?)) hash? (listof (or/c symbol? char? string?)))
+  (-> (listof string?) hash? (listof string?))
   (define starting-state START)
   (define starting-position 0)
 
   (define/contract (loop tape rules state position)
-    (-> (listof (or/c symbol? char? string?)) hash? (or/c symbol? char? string?) number? (listof (or/c symbol? char? string?)))
+    (-> (listof string?) hash? string? number? (listof string?))
     (when (= position (length tape))
       (set! position 0)
       )
@@ -48,20 +48,20 @@
 
     (if
       (equal? new-state END)
-      (processed-tape)
+      processed-tape
       (loop processed-tape rules new-state new-position)
       )
     )
+
   (loop tape rules starting-state starting-position)
   )
 
 
-
- (define example-rules (make-rules))
- (add-rule example-rules "Q0" "1" (list 'Q1 "x" RIGHT))
- (add-rule example-rules START "1" (list END "x" RIGHT))
-
- (interpret (list "1") example-rules)
-
-
+;;
+;; (define example-rules (make-rules))
+;; (add-rule example-rules "Q0" "1" (list "Q1" "x" RIGHT))
+;; (add-rule example-rules START "1" (list END "x" RIGHT))
+;;
+;; (interpret (list "1") example-rules)
+;;
 (provide interpret)

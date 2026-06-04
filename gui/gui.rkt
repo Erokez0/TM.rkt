@@ -5,6 +5,7 @@
 
 (require "../interpreter/interpreter.rkt")
 (require "../rules/rules.rkt")
+(require "../consts/consts.rkt")
 
 (define rules (make-rules))
 
@@ -47,11 +48,11 @@
            (define symbol (send symbol-input get-value))
            (define new-symbol (send new-symbol-input get-value))
            (define new-state (send new-state-input get-value))
-           (define direction 
-              (if (equal? (send direction-input get-string-selection) "Налево")
-                'LEFT
-                'RIGHT
-              )
+           (define direction
+             (if (equal? (send direction-input get-string-selection) "Налево")
+                 LEFT
+                 RIGHT
+                 )
              )
            (define result (list new-state new-symbol direction))
            (add-rule rules state symbol result)
@@ -168,6 +169,13 @@
       )
     )
 
+  (define (on-process tf evt)
+    (define tape (string-split (send tape-input get-value) " "))
+    (define result-tape (interpret tape rules))
+    (define result-tape-str (string-join result-tape " "))
+    (send tape-input set-value result-tape-str)
+    )
+
   (define tape-panel (new horizontal-panel% [parent frame]))
   (define tape-title (new message% [parent tape-panel] [label "Лента"]))
   (define tape-input (new text-field% [parent tape-panel] [init-value ""] [label ""]))
@@ -175,17 +183,7 @@
     (new button%
       [parent tape-panel]
       [label "Запустить"]
-      [callback
-       (lambda
-         (tf evt)
-         (define tape (string-split (send tape-input get-value) " "))
-         (displayln tape)
-         (displayln rules)
-         (define result-tape (interpret tape rules))
-         (displayln result-tape)
-         (send tape-input set-value result-tape)
-         )
-       ]
+      [callback on-process]
       )
     )
 
