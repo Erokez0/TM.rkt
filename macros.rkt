@@ -1,7 +1,7 @@
 #lang racket
 
-(require "../interpreter/interpreter.rkt")
-(require "../rules/rules.rkt")
+(require "interpreter.rkt")
+(require "rules.rkt")
 
 (define-syntax interpret!
   (syntax-rules ()

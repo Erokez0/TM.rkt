@@ -1,7 +1,7 @@
 #lang racket
 
-(require "../consts/consts.rkt") ;; contains START END LEFT RIGHT
-(require "../rules/rules.rkt")
+(require "consts.rkt")
+(require "rules.rkt")
 
 
 

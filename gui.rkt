@@ -3,9 +3,9 @@
 (require racket/gui)
 (require racket/string)
 
-(require "../interpreter/interpreter.rkt")
-(require "../rules/rules.rkt")
-(require "../consts/consts.rkt")
+(require "interpreter.rkt")
+(require "rules.rkt")
+(require "consts.rkt")
 
 (define rules (make-rules))
 
